@@ -4,6 +4,8 @@ namespace App\Form;
 
 use App\Entity\Article;
 use App\Entity\Category;
+use App\Entity\Tag;
+use App\Repository\TagRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -47,6 +49,17 @@ class ArticleType extends AbstractType
                 'class' => Category::class,
                 'choice_label' => 'name',
                 'placeholder' => 'Choississez une catégorie',
+            ])
+            ->add('tags', EntityType::class, [
+                'class' => Tag::class,
+                'choice_label' => 'name',
+                'placeholder' => 'Choisissez un ou des badges',
+                'required' => false,
+                'multiple' => true,
+                'query_builder' => function (TagRepository $repo) {
+                    return $repo->createQueryBuilder('u')
+                    ->orderBy('u.id', 'DESC');
+                }
             ])
             ->add('isPublished', CheckboxType::class, [
                 'required' => false
