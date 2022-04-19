@@ -2,10 +2,16 @@
 
 namespace App\Controller;
 
+use App\Entity\Category;
+use App\Form\CategoryType;
 use App\Repository\CategoryRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class CategoryController extends AbstractController
 {
@@ -30,6 +36,68 @@ class CategoryController extends AbstractController
 
         return $this->render('category/show.html.twig', [
             'category' => $category
+        ]);
+    }
+
+    /**
+     * @Route("/supprimer-categorie/{slug}", name="category_delete")
+     */
+    public function delete(EntityManagerInterface $em, Category $cat): Response
+    {
+        $em->remove($cat);
+        $em->flush();
+
+        return $this->redirectToRoute("category_list");
+    }
+
+     /**
+     * @Route("/nouvelle-categorie", name="category_new")
+     */
+    public function new(EntityManagerInterface $em, Request $request, SluggerInterface $slugger): Response
+    {
+        $category = new Category();
+        $form = $this->createForm(CategoryType::class, $category);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+            $slug = $slugger->slug($category->getName().'-'.rand(100, 500));
+            $category->setSlug($slug);
+
+            $em->persist($category);
+
+            try{
+                $em->flush();
+            }catch(Exception $e){
+
+                return $this->redirectToRoute('category_new');
+            }
+            
+            return $this->redirectToRoute('category_show', array('slug' => $slug));
+        }
+
+        return $this->render('category/new.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("/modifier-categorie/{slug}", name="category_edit")
+     */
+    public function edit(Category $category, Request $request, EntityManagerInterface $em): Response
+    {
+
+        $form = $this->createForm(CategoryType::class, $category);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+            $category->setSlug($category->getName().'-'.rand(100,500));
+            $em->flush();
+
+            return $this->redirectToRoute('category_list');
+        }
+
+        return $this->render('category/edit.html.twig', [
+            'form' => $form->createView()
         ]);
     }
 }
