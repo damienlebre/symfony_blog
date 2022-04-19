@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Badges{% endblock %}
+
+{% block body %}
+    <h1>Liste des badges</h1>
+    {% for tag in tags %}
+        <div class="badge bg-primary m-2">
+            {{ tag.name }} 
+            <a class="btn btn-warning" href="{{ path('tag_edit', {'id': tag.id}) }}">Modifier</a>
+            <a class="btn btn-danger" href="{{ path('tag_delete', {'id': tag.id}) }}">Supprimer</a>
+        </div>
+    {% endfor %}
+{% endblock %}
