@@ -42,7 +42,9 @@ class TagController extends AbstractController
 
            try{
                $em->flush();
+               $this->addFlash('success', 'Badge Crée.');
            }catch(Exception $e){
+                $this->addFlash('danger', 'Echec lors de la création du Badge.');
                return $this->redirectToRoute('tag_new');
            }
 
@@ -66,7 +68,9 @@ class TagController extends AbstractController
         {
             try{
                 $em->flush();
+                $this->addFlash('success', 'Le badge a bien été modifié.');
             }catch(Exception $e){
+                $this->addFlash('danger', 'Echec lors de la modification du badge.');
                 return $this->redirectToRoute('tag_edit');
             }
 
@@ -84,7 +88,12 @@ class TagController extends AbstractController
     public function delete(Tag $tag, EntityManagerInterface $em): Response
     {
         $em->remove($tag);
+        try{
         $em->flush();
+        $this->addFlash('success', 'Le badge a bien été supprimé.');
+        }catch(Exception $e){
+            $this->addFlash('danger', 'Echec lors de la suppression du Badge.');
+        }
         
         return $this->redirectToRoute("tag_list");
     }
