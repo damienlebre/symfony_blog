@@ -43,7 +43,7 @@ class BlogController extends AbstractController
             $em->persist($article);
 
             try{
-                $em->flush($article);
+                $em->flush();
             }catch(Exception $e){
                 return $this->redirectToRoute('blog_new');
             }
